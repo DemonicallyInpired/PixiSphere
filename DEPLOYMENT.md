@@ -103,11 +103,65 @@ databases:
 
 ### 4. Database Migration
 
-After deployment, you'll need to run database migrations:
+Render does not have a built-in "release command" feature like some other platforms, so database migrations need to be handled in one of these ways:
 
-1. Install the Render CLI: `npm install -g render-cli`
+#### Option 1: Run migrations during the build process (Free tier)
+
+If you're using the Free instance type, you can include database migrations in your build command. Update your `package.json` build script to include the migration command:
+
+```json
+{
+  "scripts": {
+    "build": "npm run db:migrate && other-build-commands"
+  }
+}
+```
+
+#### Option 2: Run migrations in your start command
+
+You can run migrations before starting your application by modifying your start command in `package.json`:
+
+```json
+{
+  "scripts": {
+    "start": "npm run db:migrate && node server.js"
+  }
+}
+```
+
+Note: This approach will run migrations every time your application starts, which may not be ideal for production environments with multiple instances.
+
+#### Option 3: Run migrations manually after deployment (Recommended for production)
+
+1. Deploy your application to Render
+2. Once deployed, go to your service dashboard in Render
+3. Click on "Shell" or "SSH" to open a terminal session
+4. Run the migration command directly:
+   ```bash
+   npm run db:migrate
+   ```
+
+#### Option 4: Use the Render CLI (if properly installed)
+
+If you have the official Render CLI installed (not the templating engine CLI):
+
+1. Install the official Render CLI:
+   ```bash
+   # Using Homebrew (macOS)
+   brew update && brew install render
+   
+   # Using direct installation script (Linux/macOS)
+   curl -fsSL https://raw.githubusercontent.com/render-oss/cli/refs/heads/main/bin/install.sh | sh
+   ```
+   
 2. Login to Render: `render login`
-3. Run migrations: `render run -s pixisphere-backend npm run db:migrate`
+3. Run migrations using SSH:
+   ```bash
+   render ssh <service-id>
+   npm run db:migrate
+   ```
+
+For most production environments, we recommend Option 3 (manual execution via Shell/SSH) as it gives you the most control over when migrations run.
 
 ## Frontend Deployment on Vercel
 
