@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: pixisphere-backend
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pixisphere-db
+          property: connectionString
+      - key: JWT_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MOCK_OTP_ENABLED
+        value: false
+      - key: MOCK_FILE_UPLOAD
+        value: false
+
+databases:
+  - name: pixisphere-db
+    plan: starter
+    ipAllowList: []
