@@ -7,7 +7,19 @@ dotenv.config();
 
 // Create the connection
 const connectionString = process.env.DATABASE_URL;
-const sql = postgres(connectionString, { max: 1 });
+
+// Validate database URL
+if (!connectionString) {
+  console.error('❌ DATABASE_URL environment variable is not set');
+  process.exit(1);
+}
+
+// Create the connection with better error handling
+const sql = postgres(connectionString, { 
+  max: 1,
+  idle_timeout: 20,
+  connect_timeout: 10,
+});
 
 // Create the database instance
 export const db = drizzle(sql, { schema });
@@ -20,6 +32,7 @@ export const testConnection = async () => {
     return true;
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
+    console.error('❌ Connection string (without password):', connectionString.replace(/:[^:@/]*@/, ':***@'));
     return false;
   }
 };

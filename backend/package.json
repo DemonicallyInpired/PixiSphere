@@ -10,7 +10,8 @@
     "test": "jest",
     "db:generate": "drizzle-kit generate:pg",
     "db:push": "drizzle-kit push:pg",
-    "db:migrate": "node scripts/migrate.js"
+    "db:migrate": "node scripts/migrate.js",
+    "db:test": "node ../test-db-connection.js"
   },
   "keywords": [
     "marketplace",

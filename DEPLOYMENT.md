@@ -160,6 +160,36 @@ In the Vercel dashboard, go to your project settings and add the environment var
 3. **Database Connection**: Verify your database URL and credentials
 4. **Build Failures**: Check the build logs in both platforms for specific error messages
 
+### Database Connection Refused Error
+
+If you're getting a "Database connection refused ::5432" error, this typically means your application cannot connect to the PostgreSQL database. Here's how to resolve it:
+
+1. **Check Database URL Format**: Ensure your DATABASE_URL follows the correct format:
+   ```
+   postgresql://username:password@host:port/database_name
+   ```
+
+2. **Verify Database Service**: Make sure your PostgreSQL database is running and accessible from your Render web service.
+
+3. **Check Database Credentials**: Confirm that the username, password, and database name are correct.
+
+4. **Network Access**: Ensure your database allows connections from Render's IP addresses.
+
+5. **Using Render's Database**: If you're using Render's built-in PostgreSQL database, make sure:
+   - The database service is created and running
+   - The database name in your render.yaml matches the actual database name
+   - You're using the correct connection string from the Render dashboard
+
+6. **Environment Variables**: Double-check that DATABASE_URL is properly set in your Render environment variables.
+
+7. **Test Connection Locally**: Try connecting to your database using the same credentials from your local machine to verify they're correct.
+
+8. **Render Free Tier Limitations**: If you're using Render's free tier:
+   - Web services spin down after 15 minutes of inactivity
+   - Database services may also have limitations
+   - Consider upgrading to a paid plan for production use
+   - Use the health check endpoint to monitor service status
+
 ### Useful Commands
 
 ```bash
@@ -178,7 +208,28 @@ npm run build
 
 # Preview build locally
 npm run preview
+
+# Check backend health (useful for debugging deployment issues)
+curl http://localhost:3000/health
 ```
+
+### Monitoring Deployment Issues
+
+After deploying to Render, use the health check endpoint to monitor your application status:
+
+1. Visit your backend health check endpoint:
+   `https://your-renderer-backend-url.onrender.com/health`
+
+2. The response will show:
+   - Application status
+   - Database connection status
+   - Environment information
+
+3. If the database shows as "disconnected" or "error", check:
+   - DATABASE_URL environment variable
+   - Database credentials
+   - Network connectivity between Render services
+   - Database service status in Render dashboard
 
 ## Scaling Considerations
 

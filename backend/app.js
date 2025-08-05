@@ -61,13 +61,28 @@ if (process.env.NODE_ENV !== 'test') {
 app.use(generalLimiter);
 
 // Health check endpoint
-app.get('/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Pixisphere API is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV,
-  });
+app.get('/health', async (req, res) => {
+  try {
+    // Test database connection
+    const dbConnected = await testConnection();
+    
+    res.json({
+      success: true,
+      message: 'Pixisphere API is running',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+      database: dbConnected ? 'connected' : 'disconnected',
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Pixisphere API is running but database connection failed',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV,
+      database: 'error',
+      error: error.message,
+    });
+  }
 });
 
 // API documentation
@@ -154,8 +169,10 @@ const startServer = async () => {
     // Test database connection
     const dbConnected = await testConnection();
     if (!dbConnected) {
-      logger.error('Failed to connect to database. Exiting...');
-      process.exit(1);
+      logger.warn('⚠️  Database connection failed. Server will start but some features may not work.');
+      logger.warn('⚠️  Please check your DATABASE_URL environment variable and database connectivity.');
+    } else {
+      logger.info('✅ Database connection successful');
     }
 
     // Start HTTP server
@@ -164,6 +181,9 @@ const startServer = async () => {
       logger.info(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
       logger.info(`🏥 Health Check: http://localhost:${PORT}/health`);
       logger.info(`🌍 Environment: ${process.env.NODE_ENV}`);
+      if (!dbConnected) {
+        logger.warn('⚠️  Server running in limited mode due to database connection issues');
+      }
     });
 
     // Handle graceful shutdown
